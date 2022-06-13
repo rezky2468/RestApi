@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:layout_margin="30dp"
     android:orientation="vertical"
-    tools:context=".RegisterActivity">
+    tools:context=".login.RegisterActivity">
 
     <EditText
         android:id="@+id/register_username_edit_text"

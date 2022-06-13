@@ -1,21 +1,20 @@
 package com.example.restapi.login;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.restapi.pokemon.PokemonActivity;
 import com.example.restapi.R;
 import com.example.restapi.menu.MenuActivity;
+import com.example.restapi.menu.MenuAdapter;
+import com.example.restapi.menu.MenuHelperClass;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,49 +28,17 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class LoginActivity extends AppCompatActivity {
+public class RegisterActivity extends AppCompatActivity {
 
-    EditText usernameEditText, passwordEditText;
-    Button loginButton, registerButton, pokemonButton;
     ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-
-        usernameEditText = findViewById(R.id.login_username_edit_text);
-        passwordEditText = findViewById(R.id.login_password_edit_text);
-        loginButton = findViewById(R.id.login_button);
-        registerButton = findViewById(R.id.login_register_button);
-        pokemonButton = findViewById(R.id.pokemon_button);
+        setContentView(R.layout.activity_register);
 
 //        MyAsyncTasks myAsyncTasks = new MyAsyncTasks();
-//        myAsyncTasks.execute("[IP_SERVER]/login");
-
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), MenuActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        pokemonButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), PokemonActivity.class);
-                startActivity(intent);
-            }
-        });
+//        myAsyncTasks.execute("[IP_SERVER]/register");
 
     }
 
@@ -80,7 +47,7 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            progressDialog = new ProgressDialog(LoginActivity.this);
+            progressDialog = new ProgressDialog(RegisterActivity.this);
             progressDialog.setMessage("processing results");
             progressDialog.setCancelable(false);
             progressDialog.show();

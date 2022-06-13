@@ -23,7 +23,7 @@
             android:name=".MenuDetailActivity"
             android:exported="true" />
         <activity
-            android:name=".RegisterActivity"
+            android:name=".login.RegisterActivity"
             android:exported="true" />
         <activity
             android:name=".login.LoginActivity"

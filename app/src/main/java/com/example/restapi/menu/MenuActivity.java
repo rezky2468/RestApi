@@ -1,6 +1,5 @@
 package com.example.restapi.menu;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,39 +10,32 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.restapi.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import javax.net.ssl.HttpsURLConnection;
 
 public class MenuActivity extends AppCompatActivity implements MenuAdapter.OnItemClickListener {
 
     RecyclerView recyclerView;
     FloatingActionButton floatingActionButton;
-    
-    MenuAdapter menuAdapter;
-
     ProgressDialog progressDialog;
-    String myUrl = "[IP_SERVER]/menu";
-    List<HashMap<String, String>> myList;
 
+    MenuAdapter menuAdapter;
     ArrayList<MenuHelperClass> arrayList;
 
     @Override
@@ -55,18 +47,9 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.OnIte
         floatingActionButton = findViewById(R.id.floating_action_button);
 
         arrayList = new ArrayList<>();
-        MenuHelperClass menuHelperClass = new MenuHelperClass();
-        menuHelperClass.setName("Burger");
-        menuHelperClass.setDescription("Very tasty");
-        menuHelperClass.setPrice("50000");
-        arrayList.add(menuHelperClass);
 
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));
-
-        menuAdapter = new MenuAdapter(getApplicationContext(), arrayList);
-        recyclerView.setAdapter(menuAdapter);
-        menuAdapter.setOnItemClickListener(MenuActivity.this);
+//        MyAsyncTasks myAsyncTasks = new MyAsyncTasks();
+//        myAsyncTasks.execute("[IP_SERVER]/menu");
         
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,11 +57,6 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.OnIte
                 Toast.makeText(MenuActivity.this, "Clicked", Toast.LENGTH_SHORT).show();
             }
         });
-
-        String myUrl = "https://api.mocki.io/v1/a44b26bb";
-        TextView resultsTextView;
-        ProgressDialog progressDialog;
-        Button displayData;
 
     }
 
@@ -122,7 +100,6 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.OnIte
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            // display a progress dialog to show the user what is happening
             progressDialog = new ProgressDialog(MenuActivity.this);
             progressDialog.setMessage("processing results");
             progressDialog.setCancelable(false);
@@ -130,81 +107,91 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.OnIte
         }
 
         @Override
-        protected String doInBackground(String... strings) {
+        protected String doInBackground(String... params) {
 
-            // Fetch data from the API in the background.
-            String result = "";
+            HttpURLConnection connection = null;
+            BufferedReader reader = null;
+
             try {
-                URL url;
-                HttpsURLConnection urlConnection = null;
-                try {
+                URL url = new URL(params[0]);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setDoOutput(true);
+                connection.setRequestMethod("GET");
+                connection.setRequestProperty("Authorization", "{{access_token}}");
+                connection.connect();
 
-                    url = new URL(myUrl);
+                if (connection.getResponseCode() == 200) { // Success, Further processing here
 
-                    // open a URL coonnection
-                    urlConnection = (HttpsURLConnection) url.openConnection();
-                    urlConnection.setDoOutput(true);
-                    urlConnection.setRequestMethod("GET");
-                    urlConnection.setRequestProperty("Authorization", "{{access_token}}");
+                    InputStream stream = connection.getInputStream();
 
-                    if (urlConnection.getResponseCode() == 200) { // Success, Further processing here
+                    reader = new BufferedReader(new InputStreamReader(stream));
 
-                        InputStream inputStream = urlConnection.getInputStream();
-                        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                    StringBuffer buffer = new StringBuffer();
+                    String line = "";
 
-                        int data = inputStreamReader.read();
-                        while (data != -1) {
-                            result += (char) data;
-                            data = inputStreamReader.read();
-                        }
+                    while ((line = reader.readLine()) != null) {
+                        buffer.append(line + "\n");
+                        Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
 
-                        Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
-
-                        // return the data to onPostExecute method
-                        return result;
-
-                    } else if (urlConnection.getResponseCode() == 400) { // Error handling code goes here
-                        Toast.makeText(getApplicationContext(), "Fail (missing field / unexpected value)", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Gagal", Toast.LENGTH_SHORT).show();
                     }
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    if (urlConnection != null) {
-                        urlConnection.disconnect();
-                    }
+                    return buffer.toString();
+
+                } else if (connection.getResponseCode() == 400) {
+                    Toast.makeText(getApplicationContext(), "Fail (missing field / unexpected value)", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Fail (missing field / unexpected value)", Toast.LENGTH_SHORT).show();
                 }
 
-            } catch (Exception e) {
+            } catch (MalformedURLException e) {
                 e.printStackTrace();
-                return "Exception: " + e.getMessage();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+                try {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            return result;
+            return null;
         }
 
         @Override
-        protected void onPostExecute(String s) {
+        protected void onPostExecute(String result) {
 
-            // show results, dismiss the progress dialog after receiving data from API
             progressDialog.dismiss();
-            try {
-
-                JSONArray jsonArray = new JSONArray(s);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    HashMap<String, String> map = new HashMap<String, String>();
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    map.put("username", jsonObject.getString("username"));
-                    map.put("description", jsonObject.getString("description"));
-                    map.put("price", jsonObject.getString("price"));
-                    myList.add(map);
+            if (result != null) {
+                try {
+                    JSONObject jsonObject = new JSONObject(result);
+                    JSONArray jsonArray = jsonObject.getJSONArray("pokemon");
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        MenuHelperClass menuHelperClass = new MenuHelperClass();
+                        menuHelperClass.setName(jsonArray.getJSONObject(i).getString("name"));
+                        menuHelperClass.setDescription(jsonArray.getJSONObject(i).getString("description"));
+                        menuHelperClass.setPrice(jsonArray.getJSONObject(i).getString("price"));
+                        arrayList.add(menuHelperClass);
+                    }
+                    Toast.makeText(MenuActivity.this, arrayList.size() + " item berhasil dipanggil", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
-            } catch (JSONException e) {
-                e.printStackTrace();
+                menuAdapter = new MenuAdapter(getApplicationContext(), arrayList);
+                menuAdapter.setOnItemClickListener(MenuActivity.this);
+
+                recyclerView.setHasFixedSize(true);
+                recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));
+                recyclerView.setAdapter(menuAdapter);
+
+            } else {
+                Toast.makeText(MenuActivity.this, "Network Problem", Toast.LENGTH_SHORT).show();
             }
         }
     }
-
 }
