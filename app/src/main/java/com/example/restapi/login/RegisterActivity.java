@@ -4,9 +4,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.restapi.R;
@@ -30,12 +34,33 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    ProgressDialog progressDialog;
+    private Button button;
+    private EditText usernameEditText, passwordEditText, confirmPasswordEditText;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
+        button = findViewById(R.id.register_button);
+        usernameEditText = findViewById(R.id.register_username_edit_text);
+        passwordEditText = findViewById(R.id.register_password_edit_text);
+        confirmPasswordEditText = findViewById(R.id.register_confirm_password_edit_text);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (usernameEditText.getText().toString().equals("") || passwordEditText.getText().toString().equals("") || confirmPasswordEditText.getText().toString().equals("")) {
+                    Toast.makeText(RegisterActivity.this, "Data tidak boleh kosong", Toast.LENGTH_SHORT).show();
+                } else if (passwordEditText.getText().toString() != confirmPasswordEditText.getText().toString()) {
+                    Toast.makeText(RegisterActivity.this, "Password tidak sama", Toast.LENGTH_SHORT).show();
+                } else {
+                    Intent intent = new Intent(getApplicationContext(), MenuActivity.class);
+                    startActivity(intent);
+                }
+            }
+        });
 
 //        MyAsyncTasks myAsyncTasks = new MyAsyncTasks();
 //        myAsyncTasks.execute("[IP_SERVER]/register");

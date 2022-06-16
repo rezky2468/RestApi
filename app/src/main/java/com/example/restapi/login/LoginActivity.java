@@ -52,8 +52,14 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), MenuActivity.class);
-                startActivity(intent);
+
+                if (usernameEditText.getText().toString().equals("") || passwordEditText.getText().toString().equals("")) {
+                    Toast.makeText(LoginActivity.this, "Data tidak boleh kosong", Toast.LENGTH_SHORT).show();
+                } else {
+                    Intent intent = new Intent(getApplicationContext(), MenuActivity.class);
+                    startActivity(intent);
+                }
+
             }
         });
 

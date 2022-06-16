@@ -18,6 +18,7 @@ import com.example.restapi.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -38,6 +39,8 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.OnIte
     MenuAdapter menuAdapter;
     ArrayList<MenuHelperClass> arrayList;
 
+    String json;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,13 +51,17 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.OnIte
 
         arrayList = new ArrayList<>();
 
-//        MyAsyncTasks myAsyncTasks = new MyAsyncTasks();
-//        myAsyncTasks.execute("[IP_SERVER]/menu");
+        MyAsyncTasks myAsyncTasks = new MyAsyncTasks();
+        myAsyncTasks.execute("https://json.extendsclass.com/bin/f6b795621c4b");
         
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MenuActivity.this, "Clicked", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getApplicationContext(), AddEditActivity.class);
+                intent.putExtra("IDENTIFIER", "add");
+                intent.putExtra("JSON", json);
+                startActivity(intent);
+                Toast.makeText(MenuActivity.this, "Add clicked", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -64,9 +71,9 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.OnIte
     public void onEditClickListener(int position) {
         Intent intent = new Intent(getApplicationContext(), AddEditActivity.class);
         Bundle bundle = new Bundle();
-        bundle.putParcelableArrayList("EDIT_TEACHER", arrayList);
+        bundle.putParcelableArrayList("EDIT_MENU", arrayList);
         intent.putExtra("IDENTIFIER", "edit");
-        intent.putExtra("EDIT_TEACHER_ID", String.valueOf(position));
+        intent.putExtra("EDIT_MENU_ID", String.valueOf(position));
         intent.putExtras(bundle);
         startActivity(intent);
         Toast.makeText(this, "Edit clicked at position: " + position, Toast.LENGTH_SHORT).show();
@@ -80,7 +87,7 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.OnIte
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        // Delete data
+                        Toast.makeText(MenuActivity.this, "Delete clicked at position: " + position, Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -92,7 +99,6 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.OnIte
         AlertDialog alert = builder.create();
         alert.show();
 
-        Toast.makeText(this, "Delete clicked at position: " + position, Toast.LENGTH_SHORT).show();
     }
 
     public class MyAsyncTasks extends AsyncTask<String, String, String> {
@@ -115,9 +121,9 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.OnIte
             try {
                 URL url = new URL(params[0]);
                 connection = (HttpURLConnection) url.openConnection();
-                connection.setDoOutput(true);
+//                connection.setDoOutput(true);
                 connection.setRequestMethod("GET");
-                connection.setRequestProperty("Authorization", "{{access_token}}");
+                connection.setRequestProperty("Security-key", "SMK_RESTAURANT");
                 connection.connect();
 
                 if (connection.getResponseCode() == 200) { // Success, Further processing here
@@ -131,8 +137,7 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.OnIte
 
                     while ((line = reader.readLine()) != null) {
                         buffer.append(line + "\n");
-                        Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
-
+                        Log.d("Response: ", "> " + line);   // here u ll get whole response...... :-)
                     }
 
                     return buffer.toString();
@@ -167,9 +172,9 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.OnIte
 
             progressDialog.dismiss();
             if (result != null) {
+                json = result;
                 try {
-                    JSONObject jsonObject = new JSONObject(result);
-                    JSONArray jsonArray = jsonObject.getJSONArray("pokemon");
+                    JSONArray jsonArray = new JSONArray(result);
                     for (int i = 0; i < jsonArray.length(); i++) {
                         MenuHelperClass menuHelperClass = new MenuHelperClass();
                         menuHelperClass.setName(jsonArray.getJSONObject(i).getString("name"));

@@ -17,6 +17,24 @@ public class MenuHelperClass implements Parcelable {
         this.price = price;
     }
 
+    protected MenuHelperClass(Parcel in) {
+        name = in.readString();
+        description = in.readString();
+        price = in.readString();
+    }
+
+    public static final Creator<MenuHelperClass> CREATOR = new Creator<MenuHelperClass>() {
+        @Override
+        public MenuHelperClass createFromParcel(Parcel in) {
+            return new MenuHelperClass(in);
+        }
+
+        @Override
+        public MenuHelperClass[] newArray(int size) {
+            return new MenuHelperClass[size];
+        }
+    };
+
     public String getName() {
         return name;
     }
@@ -48,6 +66,8 @@ public class MenuHelperClass implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-
+        parcel.writeString(name);
+        parcel.writeString(description);
+        parcel.writeString(price);
     }
 }

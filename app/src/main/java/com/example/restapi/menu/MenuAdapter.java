@@ -39,6 +39,10 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
         holder.nameTextView.setText(menuHelperClass.name);
         holder.descriptionTextView.setText(menuHelperClass.description);
         holder.priceTextView.setText(menuHelperClass.price);
+
+//        holder.nameTextView.setText("Burger");
+//        holder.descriptionTextView.setText("Very Tasty");
+//        holder.priceTextView.setText("50000");
     }
 
     @Override
@@ -89,6 +93,7 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
 
     public interface OnItemClickListener {
         void onEditClickListener(int position);
+
         void onDeleteClickListener(int position);
     }
 
